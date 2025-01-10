@@ -35,3 +35,6 @@ def divide_traffic(vehicle_count, max_section_size=10):
         sections.append((i + 1, min(i + max_section_size, vehicle_count)))
     return sections
 
+vehicle_count = 25
+sections = divide_traffic(vehicle_count)
+print("Traffic Sections:", sections)
