@@ -85,3 +85,34 @@ feedback_manager = FeedbackManager()
 feedback_manager.record_section_time(1, 12)
 feedback_manager.record_section_time(2, 8)
 adjusted_time = feedback_manager.adjust_time_limits(10)
+
+
+
+class TrafficGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Traffic Management System")
+
+        # Graph
+        self.figure = Figure(figsize=(5, 4), dpi=100)
+        self.ax = self.figure.add_subplot(111)
+        self.ax.set_title("Traffic Data")
+        self.ax.set_xlabel("Time")
+        self.ax.set_ylabel("Vehicles")
+        
+        # Canvas
+        self.canvas = FigureCanvasTkAgg(self.figure, master=self.root)
+        self.canvas.get_tk_widget().pack()
+
+        # Log
+        self.log = tk.Text(self.root, height=10)
+        self.log.pack()
+
+    def update_graph(self, data):
+        self.ax.clear()
+        self.ax.plot(data)
+        self.canvas.draw()
+
+    def add_log(self, message):
+        self.log.insert(tk.END, message + "\n")
+        self.log.see(tk.END)
