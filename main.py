@@ -6,9 +6,6 @@ vehicle_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_car
 cap = cv2.VideoCapture(0) 
 
 def detect_vehicles(frame):
-    """
-    Detect vehicles in the given frame using Haar cascades.
-    """
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) 
     vehicles = vehicle_cascade.detectMultiScale(gray, 1.1, 2)
     for (x, y, w, h) in vehicles:
@@ -31,3 +28,10 @@ if __name__ == "__main__":
 
     cap.release()
     cv2.destroyAllWindows()
+
+def divide_traffic(vehicle_count, max_section_size=10):
+    sections = []
+    for i in range(0, vehicle_count, max_section_size):
+        sections.append((i + 1, min(i + max_section_size, vehicle_count)))
+    return sections
+
