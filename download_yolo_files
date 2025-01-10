@@ -1,0 +1,15 @@
+import urllib.request
+
+weights_url = "https://pjreddie.com/media/files/yolov3.weights"
+cfg_url = "https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3.cfg"
+names_url = "https://raw.githubusercontent.com/pjreddie/darknet/master/data/coco.names"
+
+def download_file(url, filename):
+    print(f"Downloading {filename}...")
+    urllib.request.urlretrieve(url, filename)
+    print(f"{filename} downloaded successfully.")
+
+# File paths
+download_file(weights_url, "yolov3.weights")
+download_file(cfg_url, "yolov3.cfg")
+download_file(names_url, "coco.names")
