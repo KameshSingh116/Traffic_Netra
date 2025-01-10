@@ -39,3 +39,10 @@ def divide_traffic(vehicle_count, max_section_size=10):
 vehicle_count = 25
 sections = divide_traffic(vehicle_count)
 print("Traffic Sections:", sections)
+
+
+class TrafficManager:
+    def __init__(self, sections, time_limit=10):
+        self.sections = sections
+        self.time_limit = time_limit  
+        self.current_section = 0
