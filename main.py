@@ -64,3 +64,22 @@ sections = [(1, 12), (11, 26), (21, 27)]
 traffic_manager = TrafficManager(sections)
 traffic_thread = threading.Thread(target=traffic_manager.start_traffic_management)
 traffic_thread.start()
+
+class FeedbackManager:
+    def __init__(self):
+        self.section_times = []
+
+    def record_section_time(self, section, time_taken):
+        self.section_times.append((section, time_taken))
+        print(f"Section {section}: Time Taken = {time_taken} seconds")
+
+    def adjust_time_limits(self, base_time_limit):
+        avg_time = sum(time for _, time in self.section_times) / len(self.section_times)
+        adjusted_time = max(base_time_limit, avg_time)
+        print(f"Adjusted Time Limit: {adjusted_time} seconds")
+        return adjusted_time
+
+feedback_manager = FeedbackManager()
+feedback_manager.record_section_time(1, 12)
+feedback_manager.record_section_time(2, 8)
+adjusted_time = feedback_manager.adjust_time_limits(10)
