@@ -116,3 +116,10 @@ class TrafficGUI:
     def add_log(self, message):
         self.log.insert(tk.END, message + "\n")
         self.log.see(tk.END)
+
+
+root = tk.Tk()
+gui = TrafficGUI(root)
+gui.add_log("Traffic Management Started")
+gui.update_graph([1, 2, 3, 4, 5])
+root.mainloop()
