@@ -1,6 +1,5 @@
 import cv2
 import time
-import threading
 import tkinter as tk
 from tkinter import ttk
 from matplotlib.figure import Figure
@@ -9,30 +8,35 @@ import numpy as np
 from skimage.color import rgb2gray
 from scipy.ndimage import uniform_filter1d
 
-vehicle_cascade = cv2.CascadeClassifier(r'C:\\Users\\lenovo\\Pictures\\sab kuch\\Code with harry python\\haarcascade_car.xml')
+# Predefined static data for vehicle dimensions and road
+VEHICLE_DIMENSIONS = {
+    "Car": (4.5, 1.8),  # Length, Width in meters
+    "Truck": (12.0, 2.5),
+    "Bike": (2.0, 0.8)
+}
+ROAD_WIDTH = 10.0  # Road width in meters
+TOTAL_VEHICLES = 300
+ALLOWED_PERCENTAGE = 0.8
+FIRST_JUNCTION_VEHICLES = int(TOTAL_VEHICLES * ALLOWED_PERCENTAGE)
+TIME_TO_NEXT_SIGNAL = 30  # Initial time in seconds
 
-if vehicle_cascade.empty():
-    raise IOError("Error: Unable to load the Haar cascade file. Check the file path.")
+# Function to detect vehicles in a static image
+def detect_vehicles_static(image_path):
+    image = cv2.imread(image_path)
+    if image is None:
+        raise IOError("Error: Unable to load the image. Check the file path.")
 
-cap = cv2.VideoCapture(0)
+    gray = rgb2gray(image)
+    gray = (gray * 255).astype(np.uint8)
+    vehicle_cascade = cv2.CascadeClassifier(r'C:\\Users\\lenovo\\Pictures\\sab kuch\\Code with harry python\\haarcascade_car.xml')
 
-if not cap.isOpened():
-    print("Error: Camera is not accessible.")
-    exit()
+    if vehicle_cascade.empty():
+        raise IOError("Error: Unable to load the Haar cascade file. Check the file path.")
 
-running = False
-stop_event = threading.Event()
-
-
-def detect_vehicles(frame):
-    frame = cv2.resize(frame, (640, 480)) 
-    gray = rgb2gray(frame)  
-    gray = (gray * 255).astype(np.uint8) 
     vehicles = vehicle_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=3)
     for (x, y, w, h) in vehicles:
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-    return frame, len(vehicles)
-
+        cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 2)
+    return image, len(vehicles)
 
 class TrafficGUI:
     def __init__(self, root):
@@ -59,6 +63,8 @@ class TrafficGUI:
         self.log.pack()
         self.traffic_data = []
         self.smoothed_data = []
+        self.time_adjustments = []
+        self.vehicle_density = []
 
     def update_graph(self, vehicle_count):
         self.traffic_data.append(vehicle_count)
@@ -85,58 +91,43 @@ class TrafficGUI:
         print(message)
 
     def start_monitoring(self):
-        global running
-        if not running:
-            running = True
-            stop_event.clear()
-            self.add_log("Traffic Monitoring is On.")
+        self.add_log("Traffic Monitoring is On.")
+        self.run_traffic_analysis()
 
     def stop_monitoring(self):
-        global running
-        if running:
-            running = False
-            stop_event.set()
-            self.add_log("Traffic Monitoring is Off.")
+        self.add_log("Traffic Monitoring is Off.")
 
-
-def traffic_monitor(gui):
-    global running
-    try:
-        while not stop_event.is_set():
-            if not running:
-                time.sleep(0.1)
-                continue
-
-            ret, frame = cap.read()
-            if not ret:
-                print("Error: Unable to read frame.")
-                break
-
-            processed_frame, vehicle_count = detect_vehicles(frame)
-            cv2.putText(processed_frame, f'Vehicles: {vehicle_count}', (10, 50),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-            cv2.imshow("Traffic Feed", processed_frame)
-
-            gui.update_graph(vehicle_count)
-            gui.add_log(f"Detected {vehicle_count} vehicles.")
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                gui.stop_monitoring()
-                break
-
-            time.sleep(0.03)
-
-    except KeyboardInterrupt:
-        print("Program interrupted by the user.")
-
-    finally:
-        cap.release()
+    def run_traffic_analysis(self):
+        image_path = "traffic_crowd.jpg"  # Path to the static image
+        processed_image, vehicle_count = detect_vehicles_static(image_path)
+        cv2.imshow("Traffic Analysis", processed_image)
+        cv2.waitKey(0)
         cv2.destroyAllWindows()
+
+        vehicles_passed = 0
+        feedback_sent = False
+        signal_time = TIME_TO_NEXT_SIGNAL
+        current_density = vehicle_count / ROAD_WIDTH
+
+        self.update_graph(vehicle_count)
+        self.add_log(f"Detected {vehicle_count} vehicles. Road width: {ROAD_WIDTH:.2f} meters.")
+
+        vehicles_passed += vehicle_count
+        self.vehicle_density.append(current_density)
+
+        if vehicles_passed >= FIRST_JUNCTION_VEHICLES and not feedback_sent:
+            self.add_log("80% vehicles passed. Synchronizing with subsequent signals.")
+            feedback_sent = True
+
+        if feedback_sent and vehicles_passed < FIRST_JUNCTION_VEHICLES:
+            signal_time += 5
+            self.time_adjustments.append(signal_time)
+            self.add_log(f"Adjusted signal time to {signal_time} seconds to maintain flow consistency.")
+
+        if len(self.vehicle_density) > 1:
+            density_variation = abs(self.vehicle_density[-1] - self.vehicle_density[-2])
+            self.add_log(f"Vehicle density variation: {density_variation:.2f} vehicles/meter.")
 
 root = tk.Tk()
 gui = TrafficGUI(root)
-traffic_thread = threading.Thread(target=traffic_monitor, args=(gui,), daemon=True)
-traffic_thread.start()
 root.mainloop()
-
-#Actually i dont usually give much spaces betwen the lines of code due to which the code might look a bit crowded so i have kept spaces at some poimts.
