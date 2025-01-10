@@ -1,7 +1,9 @@
 import cv2
 import time
 import threading
-
+import tkinter as tk
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 vehicle_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_car.xml')
 cap = cv2.VideoCapture(0) 
