@@ -113,11 +113,21 @@ class TrafficGUI:
         self.log = tk.Text(self.root, height=10)
         self.log.pack()
 
-    def update_graph(self, data):
-        self.ax.clear()
-        self.ax.plot(data)
-        self.canvas.draw()
+    def update_graph(self, vehicle_count):
+        self.traffic_data.append(vehicle_count)
 
+        window_size = 5
+        if len(self.traffic_data) >= window_size:
+            smoothed = np.convolve(self.traffic_data, np.ones(window_size)/window_size, mode='valid')
+            self.smoothed_data = list(smoothed)
+
+        self.ax.clear()
+        self.ax.plot(self.traffic_data, label="Irregular Traffic", color="red")
+        if self.smoothed_data:
+            self.ax.plot(range(len(self.smoothed_data)), self.smoothed_data, label="Smoothed Traffic", color="green")
+        self.ax.legend()
+        self.ax.grid(True)
+        self.canvas.draw()
     def add_log(self, message):
         self.log.insert(tk.END, message + "\n")
         self.log.see(tk.END)
