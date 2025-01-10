@@ -1,5 +1,6 @@
 import cv2
 import time
+import threading
 
 
 vehicle_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_car.xml')
