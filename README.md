@@ -10,6 +10,7 @@ The **Adaptive Traffic Signal Control System** is designed to reduce congestion,
 
 ---
 
+## **Team Name:Team Mantis**
 ## 🏷️ **Title**: Tackling Urban Traffic Challenges  
 ## 💡 **Problem Statement**
 
@@ -66,3 +67,6 @@ The **Adaptive Traffic Signal Control System** is designed to reduce congestion,
    ```bash
    git clone https://github.com/your-username/adaptive-traffic-signal-system.git
    cd adaptive-traffic-signal-system
+   pip install -r requirements.txt
+   python main.py
+   python dashboard.py
