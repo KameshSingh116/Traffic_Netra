@@ -61,12 +61,4 @@ The **Adaptive Traffic Signal Control System** is designed to reduce congestion,
 
 ---
 
-## 🚀 Installation and Usage
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/your-username/adaptive-traffic-signal-system.git
-   cd adaptive-traffic-signal-system
-   pip install -r requirements.txt
-   python main.py
-   python dashboard.py
