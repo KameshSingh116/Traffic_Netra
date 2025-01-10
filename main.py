@@ -5,7 +5,10 @@ import tkinter as tk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-vehicle_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_car.xml')
+vehicle_cascade = cv2.CascadeClassifier(r'C:\Users\lenovo\Pictures\sab kuch\Code with harry python\\haarcascade_car.xml')
+if vehicle_cascade.empty():
+    raise IOError("Error: Unable to load the Haar cascade file. Check the file path.")
+
 cap = cv2.VideoCapture(0) 
 
 def detect_vehicles(frame):
@@ -93,18 +96,18 @@ class TrafficGUI:
         self.root = root
         self.root.title("Traffic Management System")
 
-        # Graph
+        
         self.figure = Figure(figsize=(5, 4), dpi=100)
         self.ax = self.figure.add_subplot(111)
         self.ax.set_title("Traffic Data")
         self.ax.set_xlabel("Time")
         self.ax.set_ylabel("Vehicles")
         
-        # Canvas
+       
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.root)
         self.canvas.get_tk_widget().pack()
 
-        # Log
+        
         self.log = tk.Text(self.root, height=10)
         self.log.pack()
 
