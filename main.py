@@ -12,6 +12,11 @@ if vehicle_cascade.empty():
 
 cap = cv2.VideoCapture(0) 
 
+if not cap.isOpened():
+    print("Error: Camera is not accessible.")
+    exit()
+
+
 def detect_vehicles(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) 
     vehicles = vehicle_cascade.detectMultiScale(gray, 1.1, 2)
@@ -113,6 +118,10 @@ class TrafficGUI:
         self.log = tk.Text(self.root, height=10)
         self.log.pack()
 
+        self.traffic_data = []
+        self.smoothed_data = []
+        
+
     def update_graph(self, vehicle_count):
         self.traffic_data.append(vehicle_count)
 
@@ -128,6 +137,7 @@ class TrafficGUI:
         self.ax.legend()
         self.ax.grid(True)
         self.canvas.draw()
+
     def add_log(self, message):
         self.log.insert(tk.END, message + "\n")
         self.log.see(tk.END)
