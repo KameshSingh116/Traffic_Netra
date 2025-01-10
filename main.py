@@ -7,7 +7,6 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 from skimage.color import rgb2gray
-from skimage.filters import gaussian
 from scipy.ndimage import uniform_filter1d
 
 vehicle_cascade = cv2.CascadeClassifier(r'C:\\Users\\lenovo\\Pictures\\sab kuch\\Code with harry python\\haarcascade_car.xml')
@@ -22,32 +21,36 @@ if not cap.isOpened():
     exit()
 
 running = False
-stop_event = threading.Event() 
+stop_event = threading.Event()
 
 
 def detect_vehicles(frame):
-    gray = rgb2gray(frame)
-    gray = (gray * 255).astype(np.uint8)
+    """
+    Detect vehicles in the given frame using Haar cascades.
+    """
+    frame = cv2.resize(frame, (640, 480)) 
+    gray = rgb2gray(frame)  
+    gray = (gray * 255).astype(np.uint8) 
     vehicles = vehicle_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=3)
     for (x, y, w, h) in vehicles:
         cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
     return frame, len(vehicles)
 
+
 class TrafficGUI:
-    def _init_(self, root):
+    def __init__(self, root):
         self.root = root
         self.root.title("Traffic Management System")
 
+        # Create the figure for plotting
         self.figure = Figure(figsize=(5, 4), dpi=100)
         self.ax = self.figure.add_subplot(111)
         self.ax.set_title("Traffic Data")
         self.ax.set_xlabel("Time")
         self.ax.set_ylabel("Vehicles")
         self.ax.grid(True)
-
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.root)
         self.canvas.get_tk_widget().pack()
-
         self.button_frame = tk.Frame(self.root)
         self.button_frame.pack(pady=10)
 
@@ -56,19 +59,17 @@ class TrafficGUI:
 
         self.stop_button = ttk.Button(self.button_frame, text="Stop", command=self.stop_monitoring)
         self.stop_button.grid(row=0, column=1, padx=5)
-
         self.log = tk.Text(self.root, height=10, state=tk.DISABLED)
         self.log.pack()
-
         self.traffic_data = []
         self.smoothed_data = []
+
     def update_graph(self, vehicle_count):
         self.traffic_data.append(vehicle_count)
-
         if len(self.traffic_data) > 5:
             self.smoothed_data = uniform_filter1d(self.traffic_data, size=5)
         else:
-            self.smoothed_data = [] 
+            self.smoothed_data = []
 
         self.ax.clear()
         self.ax.plot(self.traffic_data, label="Traffic Count", color="red")
@@ -99,13 +100,13 @@ class TrafficGUI:
         if running:
             running = False
             stop_event.set()
-            self.add_log("Traffic monitoring stopped.")
+            self.add_log("Traffic Monitoring is Off.")
 
 
 def traffic_monitor(gui):
     global running
     try:
-        while True:
+        while not stop_event.is_set():
             if not running:
                 time.sleep(0.1)
                 continue
@@ -135,8 +136,6 @@ def traffic_monitor(gui):
     finally:
         cap.release()
         cv2.destroyAllWindows()
-
-
 
 root = tk.Tk()
 gui = TrafficGUI(root)
