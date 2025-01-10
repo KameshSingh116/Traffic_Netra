@@ -4,6 +4,7 @@ import threading
 import tkinter as tk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import numpy as np
 
 vehicle_cascade = cv2.CascadeClassifier(r'C:\Users\lenovo\Pictures\sab kuch\Code with harry python\\haarcascade_car.xml')
 if vehicle_cascade.empty():
@@ -30,6 +31,7 @@ if __name__ == "__main__":
         cv2.imshow("Traffic Feed", processed_frame)
         
         if cv2.waitKey(1) & 0xFF == ord('q'):
+            print("Goodbye Buddyyyyy!")
             break
 
     cap.release()
