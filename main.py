@@ -34,36 +34,6 @@ def detect_vehicles(frame):
     return frame, len(vehicles)
 
 
-class TrafficGUI:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Traffic Management System")
-
-        self.figure = Figure(figsize=(5, 4), dpi=100)
-        self.ax = self.figure.add_subplot(111)
-        self.ax.set_title("Traffic Data")
-        self.ax.set_xlabel("Time")
-        self.ax.set_ylabel("Vehicles")
-        self.ax.grid(True)
-
-        self.canvas = FigureCanvasTkAgg(self.figure, master=self.root)
-        self.canvas.get_tk_widget().pack()
-
-        self.button_frame = tk.Frame(self.root)
-        self.button_frame.pack(pady=10)
-
-        self.start_button = ttk.Button(self.button_frame, text="Start", command=self.start_monitoring)
-        self.start_button.grid(row=0, column=0, padx=5)
-
-        self.stop_button = ttk.Button(self.button_frame, text="Stop", command=self.stop_monitoring)
-        self.stop_button.grid(row=0, column=1, padx=5)
-
-        self.log = tk.Text(self.root, height=10, state=tk.DISABLED)
-        self.log.pack()
-
-        self.traffic_data = []
-        self.smoothed_data = []
-
     def update_graph(self, vehicle_count):
         self.traffic_data.append(vehicle_count)
 
