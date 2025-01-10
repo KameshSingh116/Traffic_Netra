@@ -46,3 +46,21 @@ class TrafficManager:
         self.sections = sections
         self.time_limit = time_limit  
         self.current_section = 0
+
+    def allow_section_to_pass(self):
+        if self.current_section < len(self.sections):
+            print(f"Allowing Section {self.current_section + 1} to pass: {self.sections[self.current_section]}")
+            time.sleep(self.time_limit) 
+            self.current_section += 1
+        else:
+            print("All sections have passed.")
+
+    def start_traffic_management(self):
+        while self.current_section < len(self.sections):
+            self.allow_section_to_pass()
+
+
+sections = [(1, 12), (11, 26), (21, 27)]
+traffic_manager = TrafficManager(sections)
+traffic_thread = threading.Thread(target=traffic_manager.start_traffic_management)
+traffic_thread.start()
