@@ -33,7 +33,35 @@ def detect_vehicles(frame):
         cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
     return frame, len(vehicles)
 
+class TrafficGUI:
+    def _init_(self, root):
+        self.root = root
+        self.root.title("Traffic Management System")
 
+        self.figure = Figure(figsize=(5, 4), dpi=100)
+        self.ax = self.figure.add_subplot(111)
+        self.ax.set_title("Traffic Data")
+        self.ax.set_xlabel("Time")
+        self.ax.set_ylabel("Vehicles")
+        self.ax.grid(True)
+
+        self.canvas = FigureCanvasTkAgg(self.figure, master=self.root)
+        self.canvas.get_tk_widget().pack()
+
+        self.button_frame = tk.Frame(self.root)
+        self.button_frame.pack(pady=10)
+
+        self.start_button = ttk.Button(self.button_frame, text="Start", command=self.start_monitoring)
+        self.start_button.grid(row=0, column=0, padx=5)
+
+        self.stop_button = ttk.Button(self.button_frame, text="Stop", command=self.stop_monitoring)
+        self.stop_button.grid(row=0, column=1, padx=5)
+
+        self.log = tk.Text(self.root, height=10, state=tk.DISABLED)
+        self.log.pack()
+
+        self.traffic_data = []
+        self.smoothed_data = []
     def update_graph(self, vehicle_count):
         self.traffic_data.append(vehicle_count)
 
@@ -64,7 +92,7 @@ def detect_vehicles(frame):
         if not running:
             running = True
             stop_event.clear()
-            self.add_log("Traffic monitoring started.")
+            self.add_log("Traffic Monitoring is On.")
 
     def stop_monitoring(self):
         global running
@@ -72,6 +100,41 @@ def detect_vehicles(frame):
             running = False
             stop_event.set()
             self.add_log("Traffic monitoring stopped.")
+
+
+def traffic_monitor(gui):
+    global running
+    try:
+        while True:
+            if not running:
+                time.sleep(0.1)
+                continue
+
+            ret, frame = cap.read()
+            if not ret:
+                print("Error: Unable to read frame.")
+                break
+
+            processed_frame, vehicle_count = detect_vehicles(frame)
+            cv2.putText(processed_frame, f'Vehicles: {vehicle_count}', (10, 50),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+            cv2.imshow("Traffic Feed", processed_frame)
+
+            gui.update_graph(vehicle_count)
+            gui.add_log(f"Detected {vehicle_count} vehicles.")
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                gui.stop_monitoring()
+                break
+
+            time.sleep(0.03)
+
+    except KeyboardInterrupt:
+        print("Program interrupted by the user.")
+
+    finally:
+        cap.release()
+        cv2.destroyAllWindows()
 
 
 
