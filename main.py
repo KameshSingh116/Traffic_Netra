@@ -25,9 +25,6 @@ stop_event = threading.Event()
 
 
 def detect_vehicles(frame):
-    """
-    Detect vehicles in the given frame using Haar cascades.
-    """
     frame = cv2.resize(frame, (640, 480)) 
     gray = rgb2gray(frame)  
     gray = (gray * 255).astype(np.uint8) 
@@ -42,7 +39,6 @@ class TrafficGUI:
         self.root = root
         self.root.title("Traffic Management System")
 
-        # Create the figure for plotting
         self.figure = Figure(figsize=(5, 4), dpi=100)
         self.ax = self.figure.add_subplot(111)
         self.ax.set_title("Traffic Data")
@@ -142,3 +138,5 @@ gui = TrafficGUI(root)
 traffic_thread = threading.Thread(target=traffic_monitor, args=(gui,), daemon=True)
 traffic_thread.start()
 root.mainloop()
+
+#Actually i dont usually give much spaces betwen the lines of code due to which the code might look a bit crowded so i have kept spaces at some poimts.
