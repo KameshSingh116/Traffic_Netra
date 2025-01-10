@@ -9,7 +9,7 @@ def download_file(url, filename):
     urllib.request.urlretrieve(url, filename)
     print(f"{filename} downloaded successfully.")
 
-# File paths
+
 download_file(weights_url, "yolov3.weights")
 download_file(cfg_url, "yolov3.cfg")
 download_file(names_url, "coco.names")
