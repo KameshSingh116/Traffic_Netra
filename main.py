@@ -31,14 +31,14 @@ vehicle_types = {
 }
 
 class Vehicle:
-    def __init__(self, vehicle_type, dimension, speed):  # Corrected __init__ method
+    def __init__(self, vehicle_type, dimension, speed):
         self.vehicle_type = vehicle_type
         self.dimension = dimension
         self.speed = speed
         self.travel_progress = 0
 
 class RoadSection:
-    def __init__(self, name, length, width):  # Corrected __init__ method
+    def __init__(self, name, length, width):
         self.name = name
         self.length = length
         self.width = width
@@ -57,7 +57,7 @@ class RoadSection:
         return passed_vehicles
 
 class TrafficSignal:
-    def __init__(self, signal_id, green_time=30, amber_time=5):  # Corrected __init__ method
+    def __init__(self, signal_id, green_time=30, amber_time=5):
         self.signal_id = signal_id
         self.green_time = green_time
         self.amber_time = amber_time
@@ -89,9 +89,8 @@ class TrafficSignal:
             elif self.congestion_factor < 1:
                 self.green_time = max(self.green_time - 3, min_green_time)
 
-
 class TrafficGUI:
-    def __init__(self, root):  # Correctly define the constructor with root as an argument
+    def __init__(self, root):
         self.root = root
         self.root.title("Traffic Management System")
 
@@ -122,6 +121,7 @@ class TrafficGUI:
 
         self.traffic_data = []
         self.smoothed_data = []
+        self.constant_flow = []
 
     def update_graph(self, vehicle_count):
         self.traffic_data.append(vehicle_count)
@@ -130,16 +130,24 @@ class TrafficGUI:
         else:
             self.smoothed_data = []
 
+        if len(self.constant_flow) < len(self.traffic_data):
+            # Simulate a constant flow of traffic (e.g., average of initial data points)
+            avg_flow = np.mean(self.traffic_data[:5]) if len(self.traffic_data) >= 5 else np.mean(self.traffic_data)
+            self.constant_flow = [avg_flow] * len(self.traffic_data)
+
         self.ax.clear()
         self.ax.set_title("Traffic Data")
         self.ax.set_xlabel("Time")
         self.ax.set_ylabel("Vehicles")
         self.ax.grid(True)
 
-        self.ax.plot(self.traffic_data, label="Real-Time Traffic", color="red")
+        self.ax.plot(self.traffic_data, label="Traffic during first rush hour", color="red")
 
         if len(self.smoothed_data) > 0:
-            self.ax.plot(range(len(self.smoothed_data)), self.smoothed_data, label="Smoothed Data", color="green")
+            self.ax.plot(range(len(self.smoothed_data)), self.smoothed_data, label="Traffic during second rush hour", color="green")
+
+        if len(self.constant_flow) > 0:
+            self.ax.plot(range(len(self.constant_flow)), self.constant_flow, label="Constant Flow", color="blue", linestyle="--")
 
         self.ax.legend()
         self.canvas.draw()
@@ -163,7 +171,6 @@ class TrafficGUI:
             running = False
             stop_event.set()
             self.add_log("Traffic Monitoring is Off.")
-
 
 # Vehicle Detection Function
 def detect_vehicles(frame):
@@ -218,7 +225,7 @@ def traffic_monitor(gui, road, signal):
 if __name__ == "__main__":
     root = tk.Tk()
     gui = TrafficGUI(root)
-    road_a = RoadSection("Road A", length=100, width=4)  # No TypeError now
+    road_a = RoadSection("Road A", length=100, width=4)
     signal_a = TrafficSignal(signal_id="Signal A", green_time=20)
 
     monitoring_thread = threading.Thread(target=traffic_monitor, args=(gui, road_a, signal_a), daemon=True)
