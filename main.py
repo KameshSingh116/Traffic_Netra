@@ -10,12 +10,12 @@ from skimage.color import rgb2gray
 from scipy.ndimage import uniform_filter1d
 import random
 
-# Load Haar Cascade for vehicle detection
+#I havent provided any comments here but we have a brief description of thr project in README.md file
+
 vehicle_cascade = cv2.CascadeClassifier(r'C:\Users\lenovo\Pictures\sab kuch\Code with harry python\haarcascade_car.xml')
 if vehicle_cascade.empty():
     raise IOError("Error: Unable to load the Haar cascade file. Check the file path.")
 
-# Initialize video capture
 cap = cv2.VideoCapture(0)
 if not cap.isOpened():
     raise IOError("Error: Camera is not accessible.")
@@ -23,7 +23,6 @@ if not cap.isOpened():
 running = False
 stop_event = threading.Event()
 
-# Vehicle properties
 vehicle_types = {
     "car": {"dimension": 1, "speed": 10},
     "bus": {"dimension": 2, "speed": 5},
@@ -94,7 +93,6 @@ class TrafficGUI:
         self.root = root
         self.root.title("Traffic Management System")
 
-        # Matplotlib Figure
         self.figure = Figure(figsize=(8, 6), dpi=100)
         self.ax = self.figure.add_subplot(111)
         self.ax.set_title("Traffic Data")
@@ -105,7 +103,6 @@ class TrafficGUI:
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.root)
         self.canvas.get_tk_widget().pack()
 
-        # Control Buttons
         self.button_frame = tk.Frame(self.root)
         self.button_frame.pack(pady=10)
 
@@ -114,26 +111,26 @@ class TrafficGUI:
 
         self.stop_button = ttk.Button(self.button_frame, text="Stop", command=self.stop_monitoring)
         self.stop_button.grid(row=0, column=1, padx=5)
-
-        # Log Section
         self.log = tk.Text(self.root, height=10, state=tk.DISABLED)
         self.log.pack()
 
-        self.traffic_data = []
-        self.smoothed_data = []
-        self.constant_flow = []
+        self.time_series = []
+        self.student_data = []
+        self.office_worker_data = []
+        self.reference_data = []
 
     def update_graph(self, vehicle_count):
-        self.traffic_data.append(vehicle_count)
-        if len(self.traffic_data) > 5:
-            self.smoothed_data = uniform_filter1d(self.traffic_data, size=5)
-        else:
-            self.smoothed_data = []
+        current_time = len(self.time_series) + 1
+        self.time_series.append(current_time)
 
-        if len(self.constant_flow) < len(self.traffic_data):
-            # Simulate a constant flow of traffic (e.g., average of initial data points)
-            avg_flow = np.mean(self.traffic_data[:5]) if len(self.traffic_data) >= 5 else np.mean(self.traffic_data)
-            self.constant_flow = [avg_flow] * len(self.traffic_data)
+        self.student_data.append(vehicle_count + random.randint(10, 30))
+        self.office_worker_data.append(vehicle_count + random.randint(20, 50))
+
+        if len(self.time_series) > 1:
+            avg_data = [(self.student_data[i] + self.office_worker_data[i]) / 2 for i in range(len(self.time_series))]
+        else:
+            avg_data = [(vehicle_count + 10)]
+        self.reference_data = avg_data
 
         self.ax.clear()
         self.ax.set_title("Traffic Data")
@@ -141,13 +138,9 @@ class TrafficGUI:
         self.ax.set_ylabel("Vehicles")
         self.ax.grid(True)
 
-        self.ax.plot(self.traffic_data, label="Traffic during first rush hour", color="red")
-
-        if len(self.smoothed_data) > 0:
-            self.ax.plot(range(len(self.smoothed_data)), self.smoothed_data, label="Traffic during second rush hour", color="green")
-
-        if len(self.constant_flow) > 0:
-            self.ax.plot(range(len(self.constant_flow)), self.constant_flow, label="Constant Flow", color="blue", linestyle="--")
+        self.ax.fill_between(self.time_series, self.student_data, color="cyan", alpha=0.5, label="Student")
+        self.ax.fill_between(self.time_series, self.office_worker_data, color="blue", alpha=0.5, label="Office Worker")
+        self.ax.plot(self.time_series, self.reference_data, color="red", linestyle="--", label="Reference (Linear Average)")
 
         self.ax.legend()
         self.canvas.draw()
@@ -172,7 +165,6 @@ class TrafficGUI:
             stop_event.set()
             self.add_log("Traffic Monitoring is Off.")
 
-# Vehicle Detection Function
 def detect_vehicles(frame):
     frame = cv2.resize(frame, (640, 480))
     gray = rgb2gray(frame)
@@ -182,7 +174,6 @@ def detect_vehicles(frame):
         cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
     return frame, len(vehicles)
 
-# Traffic Monitoring Thread
 def traffic_monitor(gui, road, signal):
     global running
     try:
@@ -200,11 +191,9 @@ def traffic_monitor(gui, road, signal):
             cv2.putText(processed_frame, f'Vehicles: {vehicle_count}', (10, 50),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
             cv2.imshow("Traffic Feed", processed_frame)
-
             road.add_vehicle(Vehicle("car", dimension=1, speed=10))
             road.move_vehicles()
             signal.update(vehicle_count)
-
             gui.update_graph(vehicle_count)
             gui.add_log(f"Detected {vehicle_count} vehicles. Signal Green Time: {signal.green_time}s")
 
@@ -221,7 +210,6 @@ def traffic_monitor(gui, road, signal):
         cap.release()
         cv2.destroyAllWindows()
 
-# Main Program
 if __name__ == "__main__":
     root = tk.Tk()
     gui = TrafficGUI(root)
@@ -230,7 +218,6 @@ if __name__ == "__main__":
 
     monitoring_thread = threading.Thread(target=traffic_monitor, args=(gui, road_a, signal_a), daemon=True)
     monitoring_thread.start()
-
     root.mainloop()
     stop_event.set()
     monitoring_thread.join()
